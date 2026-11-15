@@ -39,7 +39,6 @@ import {
 	isGroupedHeader,
 	isMatchRow,
 } from "./grouped-file-output";
-import { tuiT } from "../i18n-host";
 
 /** Display metadata for grep tool results. */
 export interface GrepToolDetails {
