@@ -51,7 +51,7 @@
   "commands.collab.subcommands.status.description": "Show link + participants",
   "commands.collab.subcommands.stop.description": "Stop sharing",
   "commands.collab.subcommands.view.description": "Share a read-only link (guests can watch, not prompt)",
-  "commands.commit.description": "Generate a commit message and update changelogs",
+  "commands.commit.description": "Commit only the changes this agent and its subagents made",
   "commands.compact.description": "Manually compact the session context",
   "commands.compact.subcommands.remote.description": "Summarize via OpenAI-compatible server compaction, then fall back to a local summary",
   "commands.compact.subcommands.snapcompact.description": "Archive history onto dense bitmap images the model reads back (no LLM call)",

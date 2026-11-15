@@ -51,7 +51,7 @@
   "commands.collab.subcommands.status.description": "显示链接与参与者",
   "commands.collab.subcommands.stop.description": "停止共享",
   "commands.collab.subcommands.view.description": "分享只读链接（访客只能观看，不能发言）",
-  "commands.commit.description": "生成提交信息并更新变更日志",
+  "commands.commit.description": "只提交本 agent 及其子 agent 所做的改动",
   "commands.compact.description": "手动压缩会话上下文",
   "commands.compact.subcommands.remote.description": "通过 OpenAI 兼容的服务器压缩总结，失败时回退到本地总结",
   "commands.compact.subcommands.snapcompact.description": "把历史归档到模型可读回的致密位图上（不调用 LLM）",
