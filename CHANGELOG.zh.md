@@ -12,6 +12,29 @@
 等的说明文案为中文;`OMP_LANG=en` 或未开语言开关时全部保持英文。参数名(`--model`)、品牌名、
 模型 id 任何情况下都不翻译。
 
+## [v18.20.2-zh](https://github.com/feigo313/oh-my-pi-zh/releases/tag/v18.20.2-zh) — 2026-11-15
+
+本版把汉化基线从官方 18.18.1 抬到 **18.20.2**（上游 18.19.x / 18.20.x 的全部改动一并带上）。
+版本矩阵：10 个用户可见包 `18.20.2-zh`，`omptype` 与 `natives` 保持官方同号 `18.20.2`。
+
+- **上游新增的命令行参数补齐中文说明**：`omp find` / `omp launch` 的 `--no-judge`、`--no-spotlight`、
+  `--offline`，`omp gc` 的 `--strip`、`--strip-after-days`（共 8 条），加上上游新加的 `--goal` 等参数；
+  中文下 `omp launch --help`、`omp stats --help` 整屏是中文，`OMP_LANG=en` 仍是全英文。
+- **`/mcp` 帮助重新接回中文**：上游重写了这段帮助（新增 `--scope` / `--transport` / `--token` 用法行、
+  删掉 Smithery 两行），16 条帮助逐条重新套回原有 key，中文跟着新的英文用法同步。
+- **stats 面板三张页随上游改版重接线**：每日成本、收益时间序列、服务商页的标题与说明继续走中文，
+  并跟上新措辞（例如 "Per day, stacked by model"）。
+- **进程 / 作业卡片的本地化标签恢复**：daemon 状态、投递回执、取消结果、`pid {pid}`、运行时长前缀和
+  "N jobs / N services / N agents" 计数，在合并中被上游新版本覆盖后全部补回。
+- **native addon 按 18.20.2 重新编译**，装机二进制不再报 addon 与检出版本不一致的陈旧告警。
+
+### 本版已知遗留
+
+- 上游把若干界面短语改走集中工具（`formatCount` / `actionHint` / `pickerAction` 的标签参数），旧的中文
+  key 接不回去，本轮这些位置跟随上游英文：grep / proc / wait 的行数与计数提示、history search 的按键
+  提示、会话选择器的 "Delete"、ask 对话框的备注标题等；26 条中文 key 暂时闲置，下一轮在集中工具边界
+  重新接线。
+
 ## [v18.18.1-zh](https://github.com/feigo313/oh-my-pi-zh/releases/tag/v18.18.1-zh) — 2026-11-08
 
 本版把汉化基线从官方 18.16.0 抬到 **18.18.1**（上游 18.18.0 / 18.18.1 的全部改动一并带上），

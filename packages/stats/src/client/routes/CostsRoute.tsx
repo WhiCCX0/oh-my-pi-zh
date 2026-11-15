@@ -38,7 +38,7 @@ type SplitMode = "model" | "component";
 /** Models stacked individually in the daily chart; the rest fold into "Other". */
 const MODEL_LIMIT = 6;
 
-/** The cost series is bucketed by UTC day on the server. */
+/** The cost series is bucketed by local calendar day on the server. */
 const DAY_MS = 86_400_000;
 
 interface CostComponent {
@@ -57,13 +57,12 @@ function components(t: TranslationFn): readonly CostComponent[] {
 	];
 }
 
-const UTC_DAY = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
-const UTC_DAY_LONG = new Intl.DateTimeFormat(undefined, {
+const LOCAL_DAY = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+const LOCAL_DAY_LONG = new Intl.DateTimeFormat(undefined, {
 	weekday: "short",
 	month: "short",
 	day: "numeric",
 	year: "numeric",
-	timeZone: "UTC",
 });
 
 export function CostsRoute({ active, range }: CostsRouteProps) {
@@ -125,8 +124,8 @@ export function CostsRoute({ active, range }: CostsRouteProps) {
 								<div className="stack" style={{ gap: 12 }}>
 									<Chart
 										slots={view.buckets.length}
-										tickLabel={i => UTC_DAY.format(view.buckets[i])}
-										tooltipTitle={i => UTC_DAY_LONG.format(view.buckets[i])}
+										tickLabel={i => LOCAL_DAY.format(view.buckets[i])}
+										tooltipTitle={i => LOCAL_DAY_LONG.format(view.buckets[i])}
 										series={series}
 										hidden={hidden}
 										height={280}
