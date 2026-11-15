@@ -1,14 +1,17 @@
 import type { Component } from "../tui";
 import { Ellipsis, renderStatusLine, renderTreeList, truncateToWidth } from "../render";
+import { visibleWidth } from "../utils";
 import {
 	cappedHeadLines,
 	formatBadge,
 	formatDuration,
 	formatErrorDetail,
+	formatExpandHint,
 	formatStatusIcon,
 	PREVIEW_LIMITS,
 	TRUNCATE_LENGTHS,
 	type ToolUIColor,
+	wrapTextWithAnsi,
 } from "../render/render-utils";
 import type { Theme } from "../theme/theme";
 import type { NativeToolView, RenderResultOptions } from "./renderer";
@@ -39,6 +42,56 @@ export type ProcWriteDetails =
 
 /** Process operation selected by a write URL, independent of its content. */
 export type ProcWriteAction = "stdin" | "mode" | "kill";
+
+function preview(
+	body: string,
+	expanded: boolean,
+	theme: Theme,
+	tone: "dim" | "toolOutput" = "dim",
+	width?: number,
+): string[] {
+	if (!body.trim()) return [];
+	const quote = theme.fg("dim", theme.md.quoteBorder);
+	const prefix = `  ${quote} `;
+	const source = body.split("\n").filter(line => line.trim());
+	// An expanded IRC card (the only caller passing a width) shows the whole
+	// message. Without a width this is a proc/job card, whose expanded view
+	// keeps a budget: a job log with thousands of lines would push the
+	// transcript off the screen.
+	const ircExpanded = expanded && width !== undefined;
+	const limit = expanded ? PREVIEW_LIMITS.EXPANDED_LINES : PREVIEW_LIMITS.COLLAPSED_LINES;
+	const shown = ircExpanded ? source : cappedHeadLines(source, limit).lines;
+	const hidden = source.length - shown.length;
+	// Each row is clipped to the card width, so the text budget is that width
+	// minus the quote rail; with no card width the fixed cap stands.
+	const contentWidth = width === undefined ? TRUNCATE_LENGTHS.LINE : Math.max(1, width - visibleWidth(prefix));
+	const cap = Math.min(TRUNCATE_LENGTHS.LINE, contentWidth);
+	let cut = false;
+	const lines: string[] = [];
+	for (const line of shown) {
+		const text = safe(line.trim());
+		// IRC cards pass the card width: an expanded body soft-wraps instead of
+		// being cut. Collapsed rows keep the fixed cap, narrowed to the card.
+		if (ircExpanded) {
+			for (const row of wrapTextWithAnsi(text, contentWidth)) lines.push(`${prefix}${theme.fg(tone, row)}`);
+			continue;
+		}
+		cut ||= visibleWidth(text) > cap;
+		lines.push(`${prefix}${theme.fg(tone, truncateToWidth(text, cap, Ellipsis.Unicode))}`);
+	}
+	// The hint is not width-gated: a caller that passes no width (the proc/job
+	// card) still elides lines, and a silent cap reads as if the log ended there.
+	if (hidden > 0 || cut) {
+		const hint = formatExpandHint(theme, expanded, true);
+		const marker = hidden > 0 ? `… +${hidden} more lines` : "…";
+		lines.push(`${prefix}${theme.fg("dim", `${marker}${hint ? ` ${hint}` : ""}`)}`);
+	}
+	return lines;
+}
+
+function receiptColor(outcome: IrcDeliveryReceipt["outcome"]): ToolUIColor {
+	return outcome === "failed" ? "error" : outcome === "revived" ? "warning" : "success";
+}
 
 // =============================================================================
 // Localized labels
@@ -107,29 +160,6 @@ function procCounts(jobs: number, services: number, agents: number): string[] {
 	return counts;
 }
 
-function preview(body: string, expanded: boolean, theme: Theme, tone: "dim" | "toolOutput" = "dim"): string[] {
-	if (!body.trim()) return [];
-	const limit = expanded ? PREVIEW_LIMITS.EXPANDED_LINES : PREVIEW_LIMITS.COLLAPSED_LINES;
-	const shown = cappedHeadLines(
-		body.split("\n").filter(line => line.trim()),
-		limit,
-	);
-	const quote = theme.fg("dim", theme.md.quoteBorder);
-	const lines = shown.lines.map(
-		line =>
-			`  ${quote} ${theme.fg(tone, truncateToWidth(safe(line.trim()), TRUNCATE_LENGTHS.LINE, Ellipsis.Unicode))}`,
-	);
-	if (shown.hidden)
-		lines.push(
-			`  ${quote} ${theme.fg("dim", tuiT("ui.procRender.moreLines", "… +{count} more lines", { count: shown.hidden }))}`,
-		);
-	return lines;
-}
-
-function receiptColor(outcome: IrcDeliveryReceipt["outcome"]): ToolUIColor {
-	return outcome === "failed" ? "error" : outcome === "revived" ? "warning" : "success";
-}
-
 export function renderAgentWrite(
 	to: string,
 	body: string,
@@ -166,14 +196,8 @@ export function renderAgentWrite(
 			theme,
 		);
 		if (result?.isError && receipts.length === 0)
-			return [
-				header,
-				formatErrorDetail(
-					firstText(result) || tuiT("ui.procRender.deliveryFailed", "Message delivery failed."),
-					theme,
-				),
-			];
-		const lines = [header, ...preview(body, expanded, theme)];
+			return [header, formatErrorDetail(firstText(result) || "Message delivery failed.", theme)];
+		const lines = [header, ...preview(body, expanded, theme, "dim", width)];
 		if (result && receipts.length === 0)
 			lines.push(
 				theme.fg("muted", firstText(result) || tuiT("ui.procRender.noLivePeers", "No live peers to broadcast to.")),
