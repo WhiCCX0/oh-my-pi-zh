@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@oh-my-pi/snapcompact",
-  "version": "18.20.2-zh",
+  "version": "19.0.1-zh",
 
 
   "description": "Bitmap-frame context compression for vision-capable LLMs",

@@ -12,6 +12,70 @@
 等的说明文案为中文;`OMP_LANG=en` 或未开语言开关时全部保持英文。参数名(`--model`)、品牌名、
 模型 id 任何情况下都不翻译。
 
+## [v19.0.1-zh](https://github.com/feigo313/oh-my-pi-zh/releases/tag/v19.0.1-zh) — 2026-11-20
+
+本版把汉化基线从官方 18.20.2 抬到 **19.0.1**（18.20.3 … 18.22.2 的补丁段与 19.0.0 / 19.0.1 一并带上）。
+版本矩阵：10 个用户可见包 `19.0.1-zh`，`omptype` 与 `natives` 保持官方同号 `19.0.1`。
+
+**上游 v19 里用户真正能感知的变化**（摘要；逐条出处见官方仓库 `packages/coding-agent/CHANGELOG.md` 的 19.0.0 / 19.0.1 两段）：
+
+- **提问（ask）界面重做**：不再是独立覆盖层，改成输入框上方的一整屏可滚动表单；答到一半的内容保留，
+  发一条消息就能跳过还没回答的问题。
+- **后台进程合并到一个每用户 daemon**：`omp ps` 改为按全局 / 项目 / 会话三级列出单元，去掉 `--global`，
+  `--json` 改成 `{daemon, reports}`；daemon 升级时运行中的服务、PTY 与语言服务器可以存活（`OMP_DAEMON_TCP`）。
+- **输入框预测默认开启**：每轮答完显示当前模型建议的下一条消息；不想用就在 设置 → 交互 关掉。
+- **运行中的子 agent 与后台作业有了实时卡片**：进度、工具调用数、状态、控件、转录，跑完的 agent 也能
+  重新打开；`/tan` 的 agent 名与卡片标题由模型自动起。
+- **缓存预热策略可配置**（`auto` / `keepalive` / `compact`）：长工具调用期间保活、到期前主动压缩，
+  预热事件报告所选方式与花费；`/usage` 与 `omp usage` 新增 Claude 订阅套餐的额度。
+- **Windows 一批具体修复**：内置 `dirname` 不再忽略 `\` 分隔符与盘符（VS Code 的 `code` 启动器此前报
+  `No such file or directory`）、以 `\` 路径或 `.exe` 命名的命令不再漏掉 bash 输出最小化、PTY 转录不再多出空行。
+- **`artifact://N` 换成 `local://N.log` 文件**：可列出、可补全、可直接读；`/session` 现在显示会话的
+  `local://` 目录路径，`/copy local` 复制它（旧会话里的 `artifact://` 链接不迁移）。
+
+**本版汉化面**
+
+- **v19 新增的 19 个设置项文案补齐**：反汇编器后端与 IDA/Ghidra、实时语音 provider、缓存预热三档、
+  免密 web 搜索 provider、mnemopi 记忆召回与嵌入、跨实例任务、`tui.renderEmbeds` 嵌入渲染、MCP eval
+  命名空间与内置 transform，按 5 个设置分类落成**每语言 77 键**（共 154 行，en 逐字抄上游、zh 为译文）；
+  上游新建的两个分组标题也接上中文——`Disassembler` 译作「反汇编器」，`Ghidra` 按品牌名保留原文。
+  实测口径是 77 键，不是审计阶段预估的 96：数字候选项（`2/4/8/16`、`0/300/900/1800/3600`、`40%…80%`、
+  `50K…300K tokens`）上游只给 label，渲染器不会去查它们的 description 键，补了就是没人读的死键；
+  `task.agentPrewalkAuto` 在源码里没有 `ui` 块，设置面板从不渲染它。
+- **解冲突重接线，原则是「结构跟上游、中文跟 fork」**：ask 对话框、plan review 面板、model picker、
+  `omp ps`、进程/作业卡片、自定义编辑器、usage 面板、`omp find`、hook 编辑器与 stats 的三张页（收益、
+  总览、时间范围）都按上游 v19 重写后的结构把中文接回原位，17 个上游改动文件里的 38 处冲突逐块裁决；
+  面板结构、交互、新增能力一律跟上游，只有可见文案走 fork 的翻译缝。stats 收益页两句与总览页来源列名
+  按上游新语义重写了中英文案，时间范围补上 2 天 / 3 天两档。
+- **清理**：对齐过程中发现 20 条已无人引用的旧中文键，删掉 17 条（上游已删的 `/mcp` 帮助用法行、
+  grep / proc / wait 的计数提示、会话回退结果与分叉前的等待提示等），保留 3 条仍在引用或被复用的（`ui.select`、
+  `ui.cancel`、`ui.askDialog.noteTitle`）；align 报的 5 处 stale（`cli.update.checkFailed` ×3、
+  `cli.update.failed` ×2）经「官方 18.20.2 调用点 / 本 fork `en-cli.json` / 官方 19.0.1 调用点」三处
+  英文逐字对比，判定无需改写；`/seance`（查档不恢复会话）这个命令被上游整体删除。
+- **README**：上游 19 起自带一份官方中文 README（`README.zh-CN.md`），本 fork **保留自己的说明文档**、
+  未采用覆盖——身份告示、仅 Windows x64 的安装说明、汉化范围表与界面实拍图集是 fork 独有的，两套安装
+  口径并存只会让人读错；顶部「当前对齐」已从 v18.16.0 更新到 v19.0.1-zh。
+
+### 本版校验
+
+- 汉化门禁 `OMP_LANG=zh bun scripts/i18n/gate.ts` 17 项全 PASS（exit 0），含类型检查、en/zh 键对称、
+  命令令牌、设置渲染契约与冻结 lockfile；`packages/tui`、`packages/stats`、`packages/coding-agent` 的
+  `check:types` 全绿，oxlint 无告警、oxfmt `--check` 干净。
+- 候选 asset `omp-windows-x64.exe` 271,057,920 字节，SHA-256
+  `4381957e9ac3b8665dce6389b8d11097175f509a53d8c04be76479e5697b2246`；`--version` 报 `omp/19.0.1-zh`、
+  `OMP_LANG=zh --smoke-test` 通过。**本版尚未 commit / tag / 发布 / 上传 asset。**
+
+### 本版已知遗留
+
+- 中文界面未做真机截图复核：本轮结论来自代码级契约核对与门禁，v19 的设置面板与新交互界面待按
+  v18.18.1-zh 那轮的 ConPTY 实拍方式补图（README 图集目前仍是 `v18.16.0-zh` 实拍）。
+- `settings.disassembler.backend.options.ghidra.description` 带着上游硬编码的版本号（未安装时首次分析
+  自动装 Ghidra 12.2、JDK 25 与 PyGhidra）；上游一 bump，这条中文就得跟着改。
+- 上游把若干可见文案硬编码进数据结构与组件内部，本轮保持英文、需改代码才能本地化：stats 总览页的来源
+  分类名、模型选择器里的 "Decision models" / "No models available"、以及 native 文案面（`modes/tray.ts`、
+  `packages/tui/src/native/ask-card.ts`、`chat/embed-*`——`packages/tui/src/native/*` 至今没有翻译缝）。
+- `/seance` 删除后 `commands.seance.description`（en、zh 各一条）已成为无调用点的闲置键，本轮未回收。
+
 ## [v18.20.2-zh](https://github.com/feigo313/oh-my-pi-zh/releases/tag/v18.20.2-zh) — 2026-11-15
 
 本版把汉化基线从官方 18.18.1 抬到 **18.20.2**（上游 18.19.x / 18.20.x 的全部改动一并带上）。

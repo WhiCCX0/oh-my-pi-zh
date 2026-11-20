@@ -49,6 +49,8 @@
   "settings.task.batch.label": "批量任务调用",
   "settings.task.completionProbe.description": "通过类似 /btw 的缓存侧请求，让工作中的子代理估计任务完成度：在再过 2、5、10、30 分钟后各一次，之后每小时一次。估计值显示在 wait 与 task 视图的子代理旁边。只询问交互式会话主代理派生的子代理；print、RPC、ACP 和 SDK 运行从不探测。",
   "settings.task.completionProbe.label": "子代理完成度探测",
+  "settings.task.crossInstance.description": "让同一目录下的其他 omp 实例读取 agent 产出，并发送可唤醒 agent 的消息",
+  "settings.task.crossInstance.label": "跨实例 agent 消息",
   "settings.task.eager.description": "多强烈地推动委托给子代理",
   "settings.task.eager.label": "优先任务委派",
   "settings.task.eager.options.always.description": "系统提示加入委派指导并在首轮提醒委派",

@@ -31,6 +31,8 @@ export interface RangeMeta {
 const RANGE_META: Record<TimeRange, Omit<RangeMeta, "windowLabel"> & { windowLabelKey: string; labelKey?: string }> = {
 	"1h": { label: "1h", windowLabelKey: "range.lastHour", spanMs: HOUR_MS, bucketMs: 5 * MINUTE_MS },
 	"24h": { label: "24h", windowLabelKey: "range.last24h", spanMs: DAY_MS, bucketMs: HOUR_MS },
+	"2d": { label: "2d", windowLabelKey: "range.last2d", spanMs: 2 * DAY_MS, bucketMs: HOUR_MS },
+	"3d": { label: "3d", windowLabelKey: "range.last3d", spanMs: 3 * DAY_MS, bucketMs: HOUR_MS },
 	"7d": { label: "7d", windowLabelKey: "range.last7d", spanMs: 7 * DAY_MS, bucketMs: DAY_MS },
 	"30d": { label: "30d", windowLabelKey: "range.last30d", spanMs: 30 * DAY_MS, bucketMs: DAY_MS },
 	"90d": { label: "90d", windowLabelKey: "range.last90d", spanMs: 90 * DAY_MS, bucketMs: DAY_MS },
@@ -40,7 +42,7 @@ const RANGE_META: Record<TimeRange, Omit<RangeMeta, "windowLabel"> & { windowLab
 const MAX_BUCKETS = 1500;
 
 /** Ranges in selector order. */
-export const TIME_RANGES: readonly TimeRange[] = ["1h", "24h", "7d", "30d", "90d", "all"];
+export const TIME_RANGES: readonly TimeRange[] = ["1h", "24h", "2d", "3d", "7d", "30d", "90d", "all"];
 
 export function rangeMeta(range: TimeRange): RangeMeta {
 	const meta = RANGE_META[range];

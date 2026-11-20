@@ -77,6 +77,7 @@ import type {
 	ShowStatusOptions,
 } from "../../modes/types";
 import { extractVisibleAssistantText } from "../rpc/rpc-live";
+import { ASYNC_NOTIFY_MESSAGE_TYPE } from "@oh-my-pi/pi-tui/chat/messages";
 import { LAUNCH_COMPLETION_MESSAGE_TYPE } from "../../session/launch-completion";
 import {
 	BACKGROUND_TAN_DISPATCH_MESSAGE_TYPE,
@@ -99,6 +100,7 @@ import {
 import {
 	assistantHasVisibleContent,
 	assistantUsageIsBilled,
+	buildAsyncNotifyBlock,
 	buildAsyncResultComponent,
 	buildFileMentionBlock,
 	buildIrcMessageCard,
@@ -349,6 +351,12 @@ export class UiHelpers {
 					}
 					if (message.customType === LAUNCH_COMPLETION_MESSAGE_TYPE) {
 						const component = new PresentedBlock(buildLaunchCompletionBlock(message), messageBlock(message));
+						component.setExpanded(this.ctx.toolOutputExpanded);
+						this.ctx.chatContainer.addChild(component);
+						break;
+					}
+					if (message.customType === ASYNC_NOTIFY_MESSAGE_TYPE) {
+						const component = new PresentedBlock(buildAsyncNotifyBlock(message), messageBlock(message));
 						component.setExpanded(this.ctx.toolOutputExpanded);
 						this.ctx.chatContainer.addChild(component);
 						break;
@@ -987,6 +995,9 @@ export class UiHelpers {
 				if (text) this.ctx.chatContainer.addChild(new RecapNotice(text));
 			}
 		}
+		// A compaction (or model/plan-mode switch) after the last assistant turn
+		// rewrote the prompt prefix: the next live turn's miss is expected.
+		if (sessionContext.nextCacheMissExplained) this.ctx.lastAssistantUsage = undefined;
 
 		// Entries still in `pendingTools` are toolCalls whose result never landed
 		// during the replay — with `keepInFlightToolCalls` these are exactly the

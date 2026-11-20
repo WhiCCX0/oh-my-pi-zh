@@ -105,7 +105,6 @@ const hintTextNote = () => tuiT("ui.annotation.textNote", "text note");
 const hintFileNote = () => tuiT("ui.annotation.fileNote", "file note");
 const hintActions = () => tuiT("ui.annotation.hintActions", "actions");
 const hintBack = () => tuiT("ui.annotation.hintBack", "back");
-const hintDiscard = () => tuiT("ui.annotation.hintDiscard", "discard");
 const hintNote = () => tuiT("ui.annotation.note", "note");
 const hintNoteOnAll = () => tuiT("ui.annotation.hintNoteOnAll", "note on all");
 const hintOpen = () => tuiT("ui.annotation.hintOpen", "open");

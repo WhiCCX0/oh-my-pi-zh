@@ -145,6 +145,8 @@
   "settings.tui.mouse.label": "鼠标点击聚焦",
   "settings.tui.reactions.description": "邀请代理回应你的消息,在其气泡上显示表情徽标",
   "settings.tui.reactions.label": "代理表情回应",
+  "settings.tui.renderEmbeds.description": "邀请 agent 用 <img> 展示图片、用 <iframe> 展示网页，并在支持图形的终端上加载它们（含远程地址）后内联绘制",
+  "settings.tui.renderEmbeds.label": "渲染内嵌图片与网页",
   "settings.tui.renderMermaid.description": "将 Mermaid 围栏代码块渲染为 ASCII 图表",
   "settings.tui.renderMermaid.label": "渲染 Mermaid 图表",
   "settings.tui.renderSvg.description": "邀请 agent 以 SVG 绘制示意图和图表，在支持图形的终端上以内联图像渲染",

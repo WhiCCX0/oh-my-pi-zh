@@ -58,6 +58,8 @@ const translations: Record<Locale, Record<string, string>> = {
 		"range.allTime": "all time",
 		"range.lastHour": "the last hour",
 		"range.last24h": "the last 24 hours",
+		"range.last2d": "the last 2 days",
+		"range.last3d": "the last 3 days",
 		"range.last7d": "the last 7 days",
 		"range.last30d": "the last 30 days",
 		"range.last90d": "the last 90 days",
@@ -706,7 +708,7 @@ const translations: Record<Locale, Record<string, string>> = {
 		"overview.perBucket": "Per {bucket}",
 		"overview.tokenMix": "Token mix",
 		"overview.tokenMixDescription": "Where conversation tokens went",
-		"overview.byAgent": "By agent",
+		"overview.bySource": "By source",
 		"overview.latestRequests": "Latest requests",
 
 		// Requests route (v18.4.10)
@@ -840,12 +842,13 @@ const translations: Record<Locale, Record<string, string>> = {
 		"projects.hint.temporary": "{count} temporary",
 
 		// Gain route (v18.4.10)
-		"gain.pageDescription": "Tokens snapcompact kept out of context{scope} in {window}.",
+		"gain.pageDescription":
+			"Context snapcompact freed by compacting, and tokens it saved by imaging tool results{scope}, in {window}.",
 		"gain.scopeFor": " for {project}",
 		"gain.savedPerDay": "Saved per day",
 		"gain.cumulative": "Cumulative",
 		"gain.noSavings": "No savings recorded{scope} in {window}",
-		"gain.noSavingsHintAll": "Savings appear here once snapcompact compacts tool output.",
+		"gain.noSavingsHintAll": "Savings appear here once snapcompact compacts the context or images tool output.",
 		"gain.savedPerHit": "Saved per hit",
 		"gain.title.reduction": "Saved bytes ÷ original bytes, when the original size is known",
 		"gain.hint.originalUnknown": "original size not recorded",
@@ -948,6 +951,8 @@ const translations: Record<Locale, Record<string, string>> = {
 		"range.allTime": "全部时间",
 		"range.lastHour": "过去一小时",
 		"range.last24h": "过去24小时",
+		"range.last2d": "过去2天",
+		"range.last3d": "过去3天",
 		"range.last7d": "过去7天",
 		"range.last30d": "过去30天",
 		"range.last90d": "过去90天",
@@ -1587,7 +1592,7 @@ const translations: Record<Locale, Record<string, string>> = {
 		"overview.perBucket": "每{bucket}",
 		"overview.tokenMix": "Token 构成",
 		"overview.tokenMixDescription": "会话 tokens 的去向",
-		"overview.byAgent": "按 agent",
+		"overview.bySource": "按来源",
 		"overview.latestRequests": "最近请求",
 
 		// Requests route (v18.4.10)
@@ -1716,12 +1721,12 @@ const translations: Record<Locale, Record<string, string>> = {
 		"projects.hint.temporary": "{count} 个临时文件夹",
 
 		// Gain route (v18.4.10)
-		"gain.pageDescription": "{window}内 snapcompact 挡在上下文之外的 tokens{scope}。",
+		"gain.pageDescription": "{window}内 snapcompact 靠压缩释放的上下文、靠图像化工具输出省下的 tokens{scope}。",
 		"gain.scopeFor": "（项目 {project}）",
 		"gain.savedPerDay": "每日节省",
 		"gain.cumulative": "累计",
 		"gain.noSavings": "{window}内没有节省记录{scope}",
-		"gain.noSavingsHintAll": "一旦 snapcompact 压缩工具输出，节省数据就会出现在这里。",
+		"gain.noSavingsHintAll": "一旦 snapcompact 压缩上下文或对工具输出做图像化，节省数据就会出现在这里。",
 		"gain.savedPerHit": "每次命中节省",
 		"gain.title.reduction": "节省字节数 ÷ 原始字节数（当原始大小已知时）",
 		"gain.hint.originalUnknown": "未记录原始大小",

@@ -145,6 +145,8 @@
   "settings.tui.mouse.label": "Mouse Click-to-Focus",
   "settings.tui.reactions.description": "Invite the agent to react to your message with an emoji badge on its bubble",
   "settings.tui.reactions.label": "Agent Reactions",
+  "settings.tui.renderEmbeds.description": "Invite the agent to show pictures with <img> and web pages with <iframe>, loading them (remote addresses included) to draw inline on terminals that show graphics",
+  "settings.tui.renderEmbeds.label": "Render Embedded Images and Pages",
   "settings.tui.renderMermaid.description": "Render Mermaid fenced code blocks as ASCII diagrams",
   "settings.tui.renderMermaid.label": "Render Mermaid Diagrams",
   "settings.tui.renderSvg.description": "Invite the agent to draw diagrams and charts as SVG, rendered inline as images on terminals that show graphics",

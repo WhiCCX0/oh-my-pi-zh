@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getOverviewStats, getRecentRequests } from "../api";
 import { Legend, ShareBar, TimeChart } from "../charts";
+import { OTHER_COLOR } from "../data/colors";
 import {
 	formatCompact,
 	formatDurationMs,
@@ -16,7 +17,13 @@ import {
 import { useQuery } from "../data/query";
 import { bucketAxis, rangeMeta } from "../data/range";
 import { densify } from "../data/series";
-import { buildAgentTokenShare, sumConversationTokens } from "../data/view-models";
+import {
+	buildDecisionModelShare,
+	buildUsageTokenShare,
+	sumConversationTokens,
+	type TokenShareSegment,
+	type TokenShareView,
+} from "../data/view-models";
 import { type Locale, type TranslationFn, useTranslation } from "../i18n";
 import type { AgentType, MessageStats, TimeRange } from "../types";
 import {
@@ -109,6 +116,15 @@ export function OverviewRoute({ active, range, onRequestClick }: OverviewRoutePr
 			all: densify(points, buckets, p => p.requests),
 		};
 	}, [overview.data, range]);
+
+	const attribution = useMemo(() => {
+		const data = overview.data;
+		if (!data) return null;
+		return {
+			usage: buildUsageTokenShare(data.byAgentType, data.bySideChannel),
+			decisions: buildDecisionModelShare(data.bySideChannel),
+		};
+	}, [overview.data]);
 
 	const chartSeries =
 		metric === "requests"
@@ -250,7 +266,7 @@ export function OverviewRoute({ active, range, onRequestClick }: OverviewRoutePr
 					stale={overview.stale}
 				>
 					<QueryView query={overview} skeleton={<ChartSkeleton height={260} />}>
-						{({ overall, byAgentType }) => {
+						{({ overall }) => {
 							const mix = {
 								input: overall.totalInputTokens,
 								cacheRead: overall.totalCacheReadTokens,
@@ -258,7 +274,6 @@ export function OverviewRoute({ active, range, onRequestClick }: OverviewRoutePr
 								output: overall.totalOutputTokens,
 							};
 							const total = sumConversationTokens(overall);
-							const agents = buildAgentTokenShare(byAgentType);
 							return (
 								<div className="stack" style={{ gap: 18 }}>
 									<div className="stack" style={{ gap: 10 }}>
@@ -279,36 +294,14 @@ export function OverviewRoute({ active, range, onRequestClick }: OverviewRoutePr
 											}))}
 										/>
 									</div>
-									<div className="stack" style={{ gap: 10 }}>
-										<div className="section-label" style={{ marginBottom: 0 }}>
-											{t("overview.byAgent")}
-										</div>
-										<ShareBar
-											segments={agents.segments.map(s => ({
-												key: s.agentType,
-												label: agentLabels(t).find(a => a.agentType === s.agentType)?.label ?? s.agentType,
-												value: s.tokens,
-												color: AGENT_COLOR[s.agentType],
-											}))}
-										/>
-										{agents.segments.map(s => (
-											<div key={s.agentType} className="row" style={{ justifyContent: "space-between" }}>
-												<span className="row">
-													<span className="swatch" style={{ background: AGENT_COLOR[s.agentType] }} />
-													{agentLabels(t).find(a => a.agentType === s.agentType)?.label}
-													<span className="dim num">
-														{t("common.hint.req", { count: formatInteger(s.requests) })}
-													</span>
-												</span>
-												<span className="row">
-													<span className="dim num">{formatCompact(s.tokens, locale)}</span>
-													<span className="num" style={{ minWidth: 48, textAlign: "right" }}>
-														{formatPercent(s.share)}
-													</span>
-												</span>
+									{attribution && (
+										<div className="stack" style={{ gap: 10 }}>
+											<div className="section-label" style={{ marginBottom: 0 }}>
+												{t("overview.bySource")}
 											</div>
-										))}
-									</div>
+											<ShareBreakdown view={attribution.usage} />
+										</div>
+									)}
 								</div>
 							);
 						}}
@@ -316,8 +309,19 @@ export function OverviewRoute({ active, range, onRequestClick }: OverviewRoutePr
 				</Card>
 			</div>
 
+			{attribution && attribution.decisions.segments.length > 0 && (
+				<Card
+					index={3}
+					title="Decision models"
+					description="Where decision-model tokens went, by use case"
+					stale={overview.stale}
+				>
+					<ShareBreakdown view={attribution.decisions} wide />
+				</Card>
+			)}
+
 			<Card
-				index={3}
+				index={4}
 				title={
 					<>
 						<Dot tone="live" pulse /> {t("overview.latestRequests")}
@@ -343,6 +347,58 @@ export function OverviewRoute({ active, range, onRequestClick }: OverviewRoutePr
 					)}
 				</QueryView>
 			</Card>
+		</div>
+	);
+}
+
+function segmentLabel(segment: TokenShareSegment, t: TranslationFn): string {
+	if (segment.kind === "agent") {
+		return agentLabels(t).find(a => a.agentType === segment.agentType)?.label ?? segment.agentType;
+	}
+	return segment.category.charAt(0).toUpperCase() + segment.category.slice(1);
+}
+
+function segmentColor(segment: TokenShareSegment, colors: ReadonlyMap<string, string>): string {
+	if (segment.kind === "agent") return AGENT_COLOR[segment.agentType];
+	return colors.get(segment.category) ?? OTHER_COLOR;
+}
+
+/**
+ * A share bar over one row per segment: swatch, label, requests, tokens, percent of the bar.
+ * `wide` lays the rows out in columns, for a card that spans the page.
+ */
+function ShareBreakdown({ view, wide = false }: { view: TokenShareView; wide?: boolean }) {
+	const { t } = useTranslation();
+	const { segments, categoryColors } = view;
+	return (
+		<div className="stack" style={{ gap: 10 }}>
+			<ShareBar
+				segments={segments.map(s => ({
+					key: s.key,
+					label: segmentLabel(s, t),
+					value: s.tokens,
+					color: segmentColor(s, categoryColors),
+				}))}
+			/>
+			<div className={wide ? "grid grid-3" : "stack"} style={{ gap: wide ? "10px 28px" : 10 }}>
+				{segments.map(s => (
+					<div key={s.key} className="row" style={{ justifyContent: "space-between" }}>
+						<span className="row" style={{ minWidth: 0 }}>
+							<span className="swatch" style={{ background: segmentColor(s, categoryColors) }} />
+							<span className="truncate">{segmentLabel(s, t)}</span>
+							<span className="dim num" style={{ flexShrink: 0 }}>
+								{t("common.hint.req", { count: formatInteger(s.requests) })}
+							</span>
+						</span>
+						<span className="row" style={{ flexShrink: 0 }}>
+							<span className="dim num">{formatCompact(s.tokens)}</span>
+							<span className="num" style={{ minWidth: 48, textAlign: "right" }}>
+								{formatPercent(s.share)}
+							</span>
+						</span>
+					</div>
+				))}
+			</div>
 		</div>
 	);
 }

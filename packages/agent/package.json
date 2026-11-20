@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@oh-my-pi/pi-agent-core",
-  "version": "18.20.2-zh",
+  "version": "19.0.1-zh",
 
 
   "description": "General-purpose agent with transport abstraction, state management, and attachment support",
