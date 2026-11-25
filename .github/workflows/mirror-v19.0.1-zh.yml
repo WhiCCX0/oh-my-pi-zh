@@ -1,0 +1,42 @@
+name: Mirror upstream v19.0.1-zh
+on:
+  push:
+    branches:
+      - release/mirror-v19.0.1-zh
+permissions:
+  contents: write
+concurrency:
+  group: mirror-v19.0.1-zh
+  cancel-in-progress: false
+jobs:
+  mirror:
+    if: github.repository == 'WhiCCX0/oh-my-pi-zh'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET_REPO: WhiCCX0/oh-my-pi-zh
+      SOURCE_REPO: feigo313/oh-my-pi-zh
+      TAG: v19.0.1-zh
+      TARGET_SHA: 05945cd38bfbdf09f684062790488c5d3ea3f60b
+      ASSET: omp-windows-x64.exe
+      SHA256: 4381957e9ac3b8665dce6389b8d11097175f509a53d8c04be76479e5697b2246
+    steps:
+      - name: Verify and mirror published artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null 2>&1; then
+            echo "Release already exists; refusing to overwrite."
+            exit 1
+          fi
+          gh api "repos/$TARGET_REPO/commits/$TARGET_SHA" --jq .sha | grep -Fx "$TARGET_SHA"
+          if existing_tag=$(gh api "repos/$TARGET_REPO/git/ref/tags/$TAG" --jq '.object.sha' 2>/dev/null); then
+            test "$existing_tag" = "$TARGET_SHA"
+          fi
+          curl --fail --location --retry 3 --output "$ASSET" "https://github.com/$SOURCE_REPO/releases/download/$TAG/$ASSET"
+          test "$(stat -c '%s' "$ASSET")" = 271057920
+          printf '%s  %s\n' "$SHA256" "$ASSET" | sha256sum --check
+          printf '上游正式发布的原样镜像，未重新编译。源代码提交与原始二进制一致。\n\n上游发布：https://github.com/%s/releases/tag/%s\n\nSHA-256: `%s`\n\n---\n\n' "$SOURCE_REPO" "$TAG" "$SHA256" > release-notes.md
+          gh api "repos/$SOURCE_REPO/releases/tags/$TAG" --jq .body >> release-notes.md
+          gh release create "$TAG" "$ASSET" --repo "$TARGET_REPO" --target "$TARGET_SHA" --title "$TAG" --notes-file release-notes.md --latest
